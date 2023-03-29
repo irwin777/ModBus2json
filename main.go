@@ -4,12 +4,13 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/goburrow/modbus"
 	"log"
 	"math"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/goburrow/modbus"
 )
 
 var (
@@ -66,24 +67,20 @@ func bin2float(b []byte) float32 {
 func opros() {
 	mx.Lock()
 	defer mx.Unlock()
-		rtu := modbus.NewRTUClientHandler("/dev/ttyUSB0")
-		rtu.BaudRate = 9600
-		rtu.DataBits = 8
-		rtu.Parity = "E"
-		rtu.StopBits = 1
-		rtu.SlaveId = 3
-		rtu.Timeout = 1 * time.Second
-		err := rtu.Connect()
-		if err != nil {
-			log.Println(err)
-			for key, _ := range register {
-				counter[key] = 0.0
-			}
-			return
-		}
-		defer rtu.Close()
-		client := modbus.NewClient(rtu)
-
+	rtu := modbus.NewRTUClientHandler("/dev/ttyUSB0")
+	rtu.BaudRate = 9600
+	rtu.DataBits = 8
+	rtu.Parity = "E"
+	rtu.StopBits = 1
+	rtu.SlaveId = 3
+	rtu.Timeout = 1 * time.Second
+	err := rtu.Connect()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer rtu.Close()
+	client := modbus.NewClient(rtu)
 
 	for key, val := range register {
 		req, err := client.ReadInputRegisters(val, 2)
